@@ -3,7 +3,7 @@ mod = angular.module('infinite-scroll', [])
 mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', ($rootScope, $window, $timeout) ->
   link: (scope, elem, attrs) ->
     $window = angular.element($window)
-
+    scrollDirection = attrs.infiniteScrollDirection or 'vertical'
     # infinite-scroll-distance specifies how close to the bottom of the page
     # the window is allowed to be before we trigger a new scroll. The value
     # provided is multiplied by the window height; for example, to load
@@ -35,11 +35,17 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', ($rootScop
     # with a boolean that is set to true when the function is
     # called in order to throttle the function call.
     handler = ->
-      windowBottom = $window.height() + $window.scrollTop()
-      elementBottom = elem.offset().top + elem.height()
-      remaining = elementBottom - windowBottom
-      shouldScroll = remaining <= $window.height() * scrollDistance
-
+      if scrollDirection is 'vert'
+        windowBottom = $window.height() + $window.scrollTop()
+        elementBottom = elem.offset().top + elem.height()
+        remaining = elementBottom - windowBottom
+        shouldScroll = remaining <= $window.height() * scrollDistance
+      else
+        windowLeft = $window.width() + $window.scrollLeft()
+        elementLeft = elem.offset().left + elem.width()
+        remaining = elementLeft - windowLeft
+        shouldScroll = remaining <= $window.width() * scrollDistance
+        
       if shouldScroll && scrollEnabled
         if $rootScope.$$phase
           scope.$eval attrs.infiniteScroll
